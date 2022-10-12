@@ -274,7 +274,7 @@ fn build_accept_headers(accepted_types: &[(MediaTypes, Option<f64>)]) -> header:
 }
 
 /// Umbrella type for common actions on the different manifest schema types
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Manifest {
     S1Signed(manifest_schema1::ManifestSchema1Signed),
     S2(manifest_schema2::ManifestSchema2),
