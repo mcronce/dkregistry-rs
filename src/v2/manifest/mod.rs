@@ -345,6 +345,15 @@ impl Manifest {
             Manifest::ML(m) => Ok(m.architectures()),
         }
     }
+
+	/// Content-type of manifest
+	pub fn content_type(&self) -> MediaTypes {
+		match self {
+			Manifest::S1Signed(_) => MediaTypes::ManifestV2S1Signed,
+			Manifest::S2(_) => MediaTypes::ManifestV2S2,
+			Manifest::ML(_) => MediaTypes::ManifestList
+		}
+	}
 }
 
 #[cfg(test)]
