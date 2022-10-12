@@ -1,12 +1,14 @@
 //! Media-types for API objects.
 
 use crate::errors::Result;
+use serde_with::DeserializeFromStr;
+use serde_with::SerializeDisplay;
 use strum::EnumProperty;
 
 // For schema1 types, see https://docs.docker.com/registry/spec/manifest-v2-1/
 // For schema2 types, see https://docs.docker.com/registry/spec/manifest-v2-2/
 
-#[derive(EnumProperty, EnumString, Display, Debug, Hash, PartialEq, Eq, Clone)]
+#[derive(EnumProperty, EnumString, Display, Debug, Hash, PartialEq, Eq, Clone, DeserializeFromStr, SerializeDisplay)]
 pub enum MediaTypes {
     /// Manifest, version 2 schema 1.
     #[strum(serialize = "application/vnd.docker.distribution.manifest.v1+json")]
