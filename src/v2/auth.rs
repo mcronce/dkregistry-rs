@@ -252,35 +252,39 @@ impl Client {
             ..self.clone()
         };
 
-        let authentication_header = client.get_www_authentication_header().await?;
-        let auth = match WwwAuthenticateHeaderContent::from_www_authentication_header(
-            authentication_header,
-        )? {
-            WwwAuthenticateHeaderContent::Basic(_) => {
-                let basic_auth = credentials
-                    .map(|(user, password)| BasicAuth {
-                        user,
-                        password: Some(password),
-                    })
-                    .ok_or(Error::NoCredentials)?;
+        self.auth = match client.get_www_authentication_header().await {
+            Ok(authentication_header) => {
+                match WwwAuthenticateHeaderContent::from_www_authentication_header(
+                    authentication_header,
+                )? {
+                    WwwAuthenticateHeaderContent::Basic(_) => {
+                        let basic_auth = credentials
+                            .map(|(user, password)| BasicAuth {
+                                user,
+                                password: Some(password),
+                            })
+                            .ok_or(Error::NoCredentials)?;
 
-                Auth::Basic(basic_auth)
-            }
-            WwwAuthenticateHeaderContent::Bearer(bearer_header_content) => {
-                let bearer_auth = BearerAuth::try_from_header_content(
-                    client,
-                    scopes,
-                    credentials,
-                    bearer_header_content,
-                )
-                .await?;
+                        Some(Auth::Basic(basic_auth))
+                    }
+                    WwwAuthenticateHeaderContent::Bearer(bearer_header_content) => {
+                        let bearer_auth = BearerAuth::try_from_header_content(
+                            client,
+                            scopes,
+                            credentials,
+                            bearer_header_content,
+                        )
+                        .await?;
 
-                Auth::Bearer(bearer_auth)
+                        Some(Auth::Bearer(bearer_auth))
+                    }
+                }
             }
+            Err(Error::MissingAuthHeader(_)) => None,
+            Err(e) => return Err(e),
         };
 
         trace!("authenticate: login succeeded");
-        self.auth = Some(auth);
 
         Ok(self)
     }
