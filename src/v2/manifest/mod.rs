@@ -346,8 +346,8 @@ impl Manifest {
         }
     }
 
-	/// Content-type of manifest
-	pub fn content_type(&self) -> MediaTypes {
+	/// Media type of manifest
+	pub fn media_type(&self) -> MediaTypes {
 		match self {
 			Manifest::S1Signed(_) => MediaTypes::ManifestV2S1Signed,
 			Manifest::S2(_) => MediaTypes::ManifestV2S2,
