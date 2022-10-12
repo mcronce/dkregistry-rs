@@ -1,21 +1,22 @@
 use crate::errors::{Error, Result};
+use crate::mediatypes::MediaTypes;
 use reqwest::Method;
 
 /// Manifest version 2 schema 2.
 ///
 /// Specification is at https://docs.docker.com/registry/spec/manifest-v2-2/.
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ManifestSchema2Spec {
     #[serde(rename = "schemaVersion")]
     schema_version: u16,
     #[serde(rename = "mediaType")]
-    media_type: String,
+    media_type: MediaTypes,
     config: Config,
     layers: Vec<S2Layer>,
 }
 
 /// Super-type for combining a ManifestSchema2 with a ConfigBlob.
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ManifestSchema2 {
     #[serde(flatten)]
     pub manifest_spec: ManifestSchema2Spec,
