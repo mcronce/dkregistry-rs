@@ -32,7 +32,7 @@ pub struct BearerAuth {
 
 impl BearerAuth {
     async fn try_from_header_content(
-        client: Client,
+        client: &Client,
         scopes: &[&str],
         credentials: Option<(String, String)>,
         bearer_header_content: WwwAuthenticateHeaderContentBearer,
@@ -50,7 +50,7 @@ impl BearerAuth {
                         password: Some(password),
                     })
                 }),
-                ..client
+                ..client.clone()
             }
         }
         .build_reqwest(Method::GET, url);
@@ -244,15 +244,10 @@ impl Client {
     /// Perform registry authentication and return the authenticated client.
     ///
     /// If Bearer authentication is used the returned client will be authorized for the requested scopes.
-    pub async fn authenticate(mut self, scopes: &[&str]) -> Result<Self> {
+    pub async fn authenticate(&mut self, scopes: &[&str]) -> Result<()> {
         let credentials = self.credentials.clone();
 
-        let client = Client {
-            auth: None,
-            ..self.clone()
-        };
-
-        self.auth = match client.get_www_authentication_header().await {
+        self.auth = match self.get_www_authentication_header().await {
             Ok(authentication_header) => {
                 match WwwAuthenticateHeaderContent::from_www_authentication_header(
                     authentication_header,
@@ -269,7 +264,7 @@ impl Client {
                     }
                     WwwAuthenticateHeaderContent::Bearer(bearer_header_content) => {
                         let bearer_auth = BearerAuth::try_from_header_content(
-                            client,
+                            self,
                             scopes,
                             credentials,
                             bearer_header_content,
@@ -286,7 +281,7 @@ impl Client {
 
         trace!("authenticate: login succeeded");
 
-        Ok(self)
+        Ok(())
     }
 
     /// Check whether the client can successfully make requests to the registry.
