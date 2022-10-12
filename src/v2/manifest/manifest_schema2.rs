@@ -15,9 +15,11 @@ pub struct ManifestSchema2Spec {
 }
 
 /// Super-type for combining a ManifestSchema2 with a ConfigBlob.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct ManifestSchema2 {
+    #[serde(flatten)]
     pub manifest_spec: ManifestSchema2Spec,
+    #[serde(skip)]
     pub config_blob: ConfigBlob,
 }
 
