@@ -44,6 +44,7 @@ pin-project = "1.0"
 async-stream = "0.3"
 thiserror = "1.0.19"
 url = "2.1.1"
+serde_with = "2.0.1"
 
 [dev-dependencies]
 dirs = "4.0"
