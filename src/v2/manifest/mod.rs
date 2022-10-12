@@ -1,5 +1,5 @@
 use crate::errors::{Error, Result};
-use crate::mediatypes;
+use crate::mediatypes::MediaTypes;
 use crate::v2::*;
 use reqwest::{self, header, StatusCode, Url};
 use std::iter::FromIterator;
@@ -70,13 +70,13 @@ impl Client {
         );
 
         match media_type {
-            mediatypes::MediaTypes::ManifestV2S1Signed => Ok((
+            MediaTypes::ManifestV2S1Signed => Ok((
                 res.json::<ManifestSchema1Signed>()
                     .await
                     .map(Manifest::S1Signed)?,
                 content_digest,
             )),
-            mediatypes::MediaTypes::ManifestV2S2 => {
+            MediaTypes::ManifestV2S2 => {
                 let m = res.json::<ManifestSchema2Spec>().await?;
                 Ok((
                     m.fetch_config_blob(client_spare0, name.to_string())
@@ -85,7 +85,7 @@ impl Client {
                     content_digest,
                 ))
             }
-            mediatypes::MediaTypes::ManifestList => Ok((
+            MediaTypes::ManifestList => Ok((
                 res.json::<ManifestList>().await.map(Manifest::ML)?,
                 content_digest,
             )),
@@ -143,11 +143,11 @@ impl Client {
         name: &str,
         reference: &str,
         mediatypes: Option<&[&str]>,
-    ) -> Result<Option<mediatypes::MediaTypes>> {
+    ) -> Result<Option<MediaTypes>> {
         let url = self.build_url(name, reference)?;
         let accept_types = match mediatypes {
             None => {
-                let m = mediatypes::MediaTypes::ManifestV2S2.to_mime();
+                let m = MediaTypes::ManifestV2S2.to_mime();
                 vec![m]
             }
             Some(v) => to_mimes(v),
@@ -197,7 +197,7 @@ fn to_mimes(v: &[&str]) -> Vec<mime::Mime> {
     let res = v
         .iter()
         .filter_map(|x| {
-            let mtype = mediatypes::MediaTypes::from_str(x);
+            let mtype = MediaTypes::from_str(x);
             match mtype {
                 Ok(m) => Some(m.to_mime()),
                 _ => None,
@@ -211,7 +211,7 @@ fn to_mimes(v: &[&str]) -> Vec<mime::Mime> {
 fn evaluate_media_type(
     content_type: Option<&reqwest::header::HeaderValue>,
     url: &Url,
-) -> Result<mediatypes::MediaTypes> {
+) -> Result<MediaTypes> {
     let header_content_type = content_type
         .map(|hv| hv.to_str())
         .map(std::result::Result::unwrap_or_default);
@@ -220,7 +220,7 @@ fn evaluate_media_type(
 
     match (header_content_type, is_pulp_based) {
         (Some(header_value), false) => {
-            mediatypes::MediaTypes::from_str(header_value).map_err(Into::into)
+            MediaTypes::from_str(header_value).map_err(Into::into)
         }
         (None, false) => Err(Error::MediaTypeSniff),
         (Some(header_value), true) => {
@@ -228,20 +228,20 @@ fn evaluate_media_type(
             match header_value {
                 "application/x-troff-man" => {
                     trace!("Applying workaround for pulp-based registries, e.g. Satellite");
-                    mediatypes::MediaTypes::from_str(
+                    MediaTypes::from_str(
                         "application/vnd.docker.distribution.manifest.v1+prettyjws",
                     )
                     .map_err(Into::into)
                 }
                 _ => {
                     debug!("Received content-type '{}' from pulp-based registry. Feeling lucky and trying to parse it...", header_value);
-                    mediatypes::MediaTypes::from_str(header_value).map_err(Into::into)
+                    MediaTypes::from_str(header_value).map_err(Into::into)
                 }
             }
         }
         (None, true) => {
             trace!("Applying workaround for pulp-based registries, e.g. Satellite");
-            mediatypes::MediaTypes::from_str(
+            MediaTypes::from_str(
                 "application/vnd.docker.distribution.manifest.v1+prettyjws",
             )
             .map_err(Into::into)
