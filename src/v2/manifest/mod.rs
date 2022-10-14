@@ -227,9 +227,7 @@ fn evaluate_media_type(
     let is_pulp_based = url.path().starts_with("/pulp/docker/v2");
 
     match (header_content_type, is_pulp_based) {
-        (Some(header_value), false) => {
-            MediaTypes::from_str(header_value).map_err(Into::into)
-        }
+        (Some(header_value), false) => MediaTypes::from_str(header_value).map_err(Into::into),
         (None, false) => Err(Error::MediaTypeSniff),
         (Some(header_value), true) => {
             // TODO: remove this workaround once Satellite returns a proper content-type here
@@ -249,10 +247,8 @@ fn evaluate_media_type(
         }
         (None, true) => {
             trace!("Applying workaround for pulp-based registries, e.g. Satellite");
-            MediaTypes::from_str(
-                "application/vnd.docker.distribution.manifest.v1+prettyjws",
-            )
-            .map_err(Into::into)
+            MediaTypes::from_str("application/vnd.docker.distribution.manifest.v1+prettyjws")
+                .map_err(Into::into)
         }
     }
 }
@@ -354,14 +350,14 @@ impl Manifest {
         }
     }
 
-	/// Media type of manifest
-	pub fn media_type(&self) -> MediaTypes {
-		match self {
-			Manifest::S1Signed(_) => MediaTypes::ManifestV2S1Signed,
-			Manifest::S2(_) => MediaTypes::ManifestV2S2,
-			Manifest::ML(_) => MediaTypes::ManifestList
-		}
-	}
+    /// Media type of manifest
+    pub fn media_type(&self) -> MediaTypes {
+        match self {
+            Manifest::S1Signed(_) => MediaTypes::ManifestV2S1Signed,
+            Manifest::S2(_) => MediaTypes::ManifestV2S2,
+            Manifest::ML(_) => MediaTypes::ManifestList,
+        }
+    }
 }
 
 #[cfg(test)]
