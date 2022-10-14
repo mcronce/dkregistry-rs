@@ -1,6 +1,7 @@
 use crate::errors::{Error, Result};
 use crate::mediatypes::MediaTypes;
 use crate::v2::*;
+use bytes::Bytes;
 use reqwest::{self, header, StatusCode, Url};
 use std::iter::FromIterator;
 use std::str::FromStr;
@@ -31,11 +32,39 @@ impl Client {
         name: &str,
         reference: &str,
     ) -> Result<(Manifest, Option<String>)> {
+        let (body, media_type, content_digest) =
+            self.get_raw_manifest_and_metadata(name, reference).await?;
+
+        match media_type {
+            MediaTypes::ManifestV2S1Signed => Ok((
+                Manifest::S1Signed(serde_json::from_slice(body.as_ref())?),
+                content_digest,
+            )),
+            MediaTypes::ManifestV2S2 => {
+                let m: ManifestSchema2Spec = serde_json::from_slice(body.as_ref())?;
+                Ok((
+                    m.fetch_config_blob(self.clone(), name.to_string())
+                        .await
+                        .map(Manifest::S2)?,
+                    content_digest,
+                ))
+            }
+            MediaTypes::ManifestList => Ok((
+                Manifest::ML(serde_json::from_slice(body.as_ref())?),
+                content_digest,
+            )),
+            unsupported => Err(Error::UnsupportedMediaType(unsupported)),
+        }
+    }
+
+    pub async fn get_raw_manifest_and_metadata(
+        &self,
+        name: &str,
+        reference: &str,
+    ) -> Result<(Bytes, MediaTypes, Option<String>)> {
         let url = self.build_url(name, reference)?;
 
         let accept_headers = build_accept_headers(&self.accepted_types);
-
-        let client_spare0 = self.clone();
 
         let res = self
             .build_reqwest(Method::GET, url.clone())
@@ -69,28 +98,7 @@ impl Client {
             media_type
         );
 
-        match media_type {
-            MediaTypes::ManifestV2S1Signed => Ok((
-                res.json::<ManifestSchema1Signed>()
-                    .await
-                    .map(Manifest::S1Signed)?,
-                content_digest,
-            )),
-            MediaTypes::ManifestV2S2 => {
-                let m = res.json::<ManifestSchema2Spec>().await?;
-                Ok((
-                    m.fetch_config_blob(client_spare0, name.to_string())
-                        .await
-                        .map(Manifest::S2)?,
-                    content_digest,
-                ))
-            }
-            MediaTypes::ManifestList => Ok((
-                res.json::<ManifestList>().await.map(Manifest::ML)?,
-                content_digest,
-            )),
-            unsupported => Err(Error::UnsupportedMediaType(unsupported)),
-        }
+        Ok((res.bytes().await?, media_type, content_digest))
     }
 
     fn build_url(&self, name: &str, reference: &str) -> Result<Url> {
