@@ -64,7 +64,7 @@ impl Client {
         &self,
         name: &str,
         digest: &str,
-    ) -> Result<impl Stream<Item = Result<Vec<u8>>>> {
+    ) -> Result<impl Stream<Item = Result<Bytes>>> {
         Ok(self.get_blob_response(name, digest).await?.stream())
     }
 }
@@ -98,7 +98,7 @@ impl BlobResponse {
     }
 
     /// Get bytes stream of the blob.
-    pub fn stream(self) -> impl Stream<Item = Result<Vec<u8>>> {
+    pub fn stream(self) -> impl Stream<Item = Result<Bytes>> {
         BlobStream::new(self.resp.bytes_stream(), self.digest)
     }
 }
@@ -130,7 +130,7 @@ impl<S> Stream for BlobStream<S>
 where
     S: Stream<Item = reqwest::Result<Bytes>> + Unpin,
 {
-    type Item = Result<Vec<u8>>;
+    type Item = Result<Bytes>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.project();
@@ -142,7 +142,7 @@ where
                 };
                 let chunk = chunk_res?;
                 digest.update(&chunk);
-                Poll::Ready(Some(Ok(chunk.to_vec())))
+                Poll::Ready(Some(Ok(chunk)))
             }
             Poll::Ready(None) => match this.digest.take() {
                 Some(digest) => match digest.verify() {
