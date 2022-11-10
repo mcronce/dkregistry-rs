@@ -120,20 +120,20 @@ impl Reference {
         }
     }
 
-    pub fn registry(&self) -> String {
-        self.registry.clone()
+    pub fn registry(&self) -> &str {
+        self.registry.as_ref()
     }
 
-    pub fn repository(&self) -> String {
-        self.repository.clone()
+    pub fn repository(&self) -> &str {
+        self.repository.as_ref()
     }
 
     pub fn version(&self) -> String {
         self.version.to_string()
     }
 
-    pub fn to_raw_string(&self) -> String {
-        self.raw_input.clone()
+    pub fn to_raw_string(&self) -> &str {
+        self.raw_input.as_ref()
     }
 
     //TODO(lucab): move this to a real URL type
