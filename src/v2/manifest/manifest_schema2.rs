@@ -133,15 +133,15 @@ impl ManifestSchema2 {
     }
 
     /// Get the architecture from the config
-    pub fn architecture(&self) -> String {
-        self.config_blob.architecture.to_owned()
+    pub fn architecture(&self) -> &str {
+        self.config_blob.architecture.as_ref()
     }
 }
 
 impl ManifestObj {
     /// Get the architecture of the manifest object
-    pub fn architecture(&self) -> String {
-        self.platform.architecture.to_owned()
+    pub fn architecture(&self) -> &str {
+        self.platform.architecture.as_ref()
     }
 
     /// Returns the sha digest of the manifest object
@@ -152,7 +152,7 @@ impl ManifestObj {
 
 impl ManifestList {
     /// Get architecture of all the manifests
-    pub fn architectures(&self) -> Vec<String> {
+    pub fn architectures(&self) -> Vec<&str> {
         self.manifests.iter().map(|mo| mo.architecture()).collect()
     }
 

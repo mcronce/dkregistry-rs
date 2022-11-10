@@ -364,9 +364,9 @@ impl Manifest {
     }
 
     /// The architectures of the image the manifest points to, if available.
-    pub fn architectures(&self) -> Result<Vec<String>> {
+    pub fn architectures(&self) -> Result<Vec<&str>> {
         match self {
-            Manifest::S1Signed(m) => Ok([m.architecture.clone()].to_vec()),
+            Manifest::S1Signed(m) => Ok(vec![&m.architecture]),
             Manifest::S2(m) => Ok([m.architecture()].to_vec()),
             Manifest::ML(m) => Ok(m.architectures()),
         }
