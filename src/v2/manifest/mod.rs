@@ -2,9 +2,10 @@ use crate::errors::{Error, Result};
 use crate::mediatypes::MediaTypes;
 use crate::v2::*;
 use bytes::Bytes;
-use reqwest::{self, header, StatusCode, Url};
+use reqwest::{self, header, StatusCode};
 use std::iter::FromIterator;
 use std::str::FromStr;
+use url::Url;
 
 mod manifest_schema1;
 pub use self::manifest_schema1::*;
@@ -13,12 +14,34 @@ mod manifest_schema2;
 pub use self::manifest_schema2::*;
 
 impl Client {
+    #[inline]
+    fn manifest_url(
+        &self,
+        name: &str,
+        reference: &str,
+        ns: Option<&str>,
+    ) -> core::result::Result<Url, url::ParseError> {
+        let ep = match ns {
+            Some(v) => format!(
+                "{}/v2/{}/manifests/{}?ns={}",
+                self.base_url, name, reference, v
+            ),
+            None => format!("{}/v2/{}/manifests/{}", self.base_url, name, reference),
+        };
+        reqwest::Url::parse(&ep)
+    }
+
     /// Fetch an image manifest.
     ///
     /// The name and reference parameters identify the image.
     /// The reference may be either a tag or digest.
-    pub async fn get_manifest(&self, name: &str, reference: &str) -> Result<Manifest> {
-        self.get_manifest_and_ref(name, reference)
+    pub async fn get_manifest(
+        &self,
+        name: &str,
+        reference: &str,
+        ns: Option<&str>,
+    ) -> Result<Manifest> {
+        self.get_manifest_and_ref(name, reference, ns)
             .await
             .map(|(manifest, _)| manifest)
     }
@@ -31,9 +54,11 @@ impl Client {
         &self,
         name: &str,
         reference: &str,
+        ns: Option<&str>,
     ) -> Result<(Manifest, Option<String>)> {
-        let (body, media_type, content_digest) =
-            self.get_raw_manifest_and_metadata(name, reference).await?;
+        let (body, media_type, content_digest) = self
+            .get_raw_manifest_and_metadata(name, reference, ns)
+            .await?;
 
         match media_type {
             MediaTypes::ManifestV2S1Signed => Ok((
@@ -61,8 +86,9 @@ impl Client {
         &self,
         name: &str,
         reference: &str,
+        ns: Option<&str>,
     ) -> Result<(Bytes, MediaTypes, Option<String>)> {
-        let url = self.build_url(name, reference)?;
+        let url = self.manifest_url(name, reference, ns)?;
 
         let accept_headers = build_accept_headers(&self.accepted_types);
 
@@ -101,19 +127,14 @@ impl Client {
         Ok((res.bytes().await?, media_type, content_digest))
     }
 
-    fn build_url(&self, name: &str, reference: &str) -> Result<Url> {
-        let ep = format!(
-            "{}/v2/{}/manifests/{}",
-            self.base_url.clone(),
-            name,
-            reference
-        );
-        reqwest::Url::parse(&ep).map_err(Error::from)
-    }
-
     /// Fetch content digest for a particular tag.
-    pub async fn get_manifestref(&self, name: &str, reference: &str) -> Result<Option<String>> {
-        let url = self.build_url(name, reference)?;
+    pub async fn get_manifestref(
+        &self,
+        name: &str,
+        reference: &str,
+        ns: Option<&str>,
+    ) -> Result<Option<String>> {
+        let url = self.manifest_url(name, reference, ns)?;
 
         let accept_headers = build_accept_headers(&self.accepted_types);
 
@@ -150,9 +171,10 @@ impl Client {
         &self,
         name: &str,
         reference: &str,
+        ns: Option<&str>,
         mediatypes: Option<&[&str]>,
     ) -> Result<Option<MediaTypes>> {
-        let url = self.build_url(name, reference)?;
+        let url = self.manifest_url(name, reference, ns)?;
         let accept_types = match mediatypes {
             None => {
                 let m = MediaTypes::ManifestV2S2.to_mime();
