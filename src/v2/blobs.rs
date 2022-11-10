@@ -10,14 +10,22 @@ use pin_project::pin_project;
 use reqwest::{self, Method, StatusCode};
 
 impl Client {
+    #[inline]
+    fn blob_url(&self, name: &str, digest: &str, ns: Option<&str>) -> String {
+        match ns {
+            Some(v) => format!("{}/v2/{}/blobs/{}?ns={}", self.base_url, name, digest, v),
+            None => format!("{}/v2/{}/blobs/{}", self.base_url, name, digest),
+        }
+    }
+
     /// Check if a blob exists.
-    pub async fn has_blob(&self, name: &str, digest: &str) -> Result<bool> {
+    pub async fn has_blob(&self, name: &str, digest: &str, ns: Option<&str>) -> Result<bool> {
         let url = {
-            let ep = format!("{}/v2/{}/blobs/{}", self.base_url, name, digest);
+            let ep = self.blob_url(name, digest, ns);
             reqwest::Url::parse(&ep)?
         };
 
-        let res = self.build_reqwest(Method::HEAD, url.clone()).send().await?;
+        let res = self.build_reqwest(Method::HEAD, url).send().await?;
 
         trace!("Blob HEAD status: {:?}", res.status());
 
@@ -27,11 +35,17 @@ impl Client {
         }
     }
 
-    pub async fn get_blob_response(&self, name: &str, digest: &str) -> Result<BlobResponse> {
-        let ep = format!("{}/v2/{}/blobs/{}", self.base_url, name, digest);
+    pub async fn get_blob_response(
+        &self,
+        name: &str,
+        digest: &str,
+        ns: Option<&str>,
+    ) -> Result<BlobResponse> {
+        let ep = self.blob_url(name, digest, ns);
         let url = reqwest::Url::parse(&ep)?;
 
-        let resp = self.build_reqwest(Method::GET, url.clone()).send().await?;
+        let resp = self.build_reqwest(Method::GET, url).send().await?;
+        println!("{:?}", resp.content_length());
 
         let status = resp.status();
         trace!("GET {} status: {}", resp.url(), status);
@@ -55,8 +69,11 @@ impl Client {
     }
 
     /// Retrieve blob.
-    pub async fn get_blob(&self, name: &str, digest: &str) -> Result<Vec<u8>> {
-        self.get_blob_response(name, digest).await?.bytes().await
+    pub async fn get_blob(&self, name: &str, digest: &str, ns: Option<&str>) -> Result<Vec<u8>> {
+        self.get_blob_response(name, digest, ns)
+            .await?
+            .bytes()
+            .await
     }
 
     /// Retrieve blob stream.
@@ -64,8 +81,9 @@ impl Client {
         &self,
         name: &str,
         digest: &str,
+        ns: Option<&str>,
     ) -> Result<impl Stream<Item = Result<Bytes>>> {
-        Ok(self.get_blob_response(name, digest).await?.stream())
+        Ok(self.get_blob_response(name, digest, ns).await?.stream())
     }
 }
 
