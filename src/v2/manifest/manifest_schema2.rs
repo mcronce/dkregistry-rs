@@ -96,23 +96,16 @@ impl ManifestSchema2Spec {
         client: &crate::v2::Client,
         repo: String,
     ) -> Result<ManifestSchema2> {
-        let url = {
-            let ep = format!(
-                "{}/v2/{}/blobs/{}",
-                client.base_url.clone(),
-                repo,
-                self.config.digest
-            );
-            reqwest::Url::parse(&ep)?
-        };
+        let ep = format!(
+            "{}/v2/{}/blobs/{}",
+            &client.base_url, repo, self.config.digest
+        );
+        let url = reqwest::Url::parse(&ep)?;
 
-        let r = client
-            .build_reqwest(Method::GET, url.clone())
-            .send()
-            .await?;
+        let r = client.build_reqwest(Method::GET, url).send().await?;
 
         let status = r.status();
-        trace!("GET {:?}: {}", url, &status);
+        trace!("GET {:?}: {}", ep, &status);
 
         if !status.is_success() {
             return Err(Error::UnexpectedHttpStatus(status));
