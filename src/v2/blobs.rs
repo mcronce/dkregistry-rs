@@ -8,23 +8,26 @@ use futures::stream::Stream;
 use futures::task::{Context, Poll};
 use pin_project::pin_project;
 use reqwest::{self, Method, StatusCode};
+use url::Url;
 
 impl Client {
     #[inline]
-    fn blob_url(&self, name: &str, digest: &str, ns: Option<&str>) -> String {
-        match ns {
+    fn blob_url(
+        &self,
+        name: &str,
+        digest: &str,
+        ns: Option<&str>,
+    ) -> core::result::Result<Url, url::ParseError> {
+        let ep = match ns {
             Some(v) => format!("{}/v2/{}/blobs/{}?ns={}", self.base_url, name, digest, v),
             None => format!("{}/v2/{}/blobs/{}", self.base_url, name, digest),
-        }
+        };
+        Url::parse(&ep)
     }
 
     /// Check if a blob exists.
     pub async fn has_blob(&self, name: &str, digest: &str, ns: Option<&str>) -> Result<bool> {
-        let url = {
-            let ep = self.blob_url(name, digest, ns);
-            reqwest::Url::parse(&ep)?
-        };
-
+        let url = self.blob_url(name, digest, ns)?;
         let res = self.build_reqwest(Method::HEAD, url).send().await?;
 
         trace!("Blob HEAD status: {:?}", res.status());
@@ -41,8 +44,7 @@ impl Client {
         digest: &str,
         ns: Option<&str>,
     ) -> Result<BlobResponse> {
-        let ep = self.blob_url(name, digest, ns);
-        let url = reqwest::Url::parse(&ep)?;
+        let url = self.blob_url(name, digest, ns)?;
 
         let resp = self.build_reqwest(Method::GET, url).send().await?;
         println!("{:?}", resp.content_length());
