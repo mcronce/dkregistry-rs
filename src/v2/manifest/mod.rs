@@ -68,7 +68,7 @@ impl Client {
             MediaTypes::ManifestV2S2 => {
                 let m: ManifestSchema2Spec = serde_json::from_slice(body.as_ref())?;
                 Ok((
-                    m.fetch_config_blob(self.clone(), name.to_string())
+                    m.fetch_config_blob(self, name.to_string())
                         .await
                         .map(Manifest::S2)?,
                     content_digest,

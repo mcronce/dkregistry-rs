@@ -93,7 +93,7 @@ impl ManifestSchema2Spec {
     /// Fetch the config blob for this manifest
     pub(crate) async fn fetch_config_blob(
         self,
-        client: crate::v2::Client,
+        client: &crate::v2::Client,
         repo: String,
     ) -> Result<ManifestSchema2> {
         let url = {
