@@ -47,7 +47,6 @@ impl Client {
         let url = self.blob_url(name, digest, ns)?;
 
         let resp = self.build_reqwest(Method::GET, url).send().await?;
-        println!("{:?}", resp.content_length());
 
         let status = resp.status();
         trace!("GET {} status: {}", resp.url(), status);
