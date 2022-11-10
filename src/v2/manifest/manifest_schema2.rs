@@ -124,11 +124,11 @@ impl ManifestSchema2 {
     /// List digests of all layers referenced by this manifest.
     ///
     /// The returned layers list is ordered starting with the base image first.
-    pub fn get_layers(&self) -> Vec<String> {
+    pub fn get_layers(&self) -> Vec<&str> {
         self.manifest_spec
             .layers
             .iter()
-            .map(|l| l.digest.clone())
+            .map(|l| l.digest.as_ref())
             .collect()
     }
 
@@ -145,8 +145,8 @@ impl ManifestObj {
     }
 
     /// Returns the sha digest of the manifest object
-    pub fn digest(&self) -> String {
-        self.digest.to_owned()
+    pub fn digest(&self) -> &str {
+        self.digest.as_ref()
     }
 }
 
@@ -157,7 +157,7 @@ impl ManifestList {
     }
 
     /// Get the digest for all the manifest images in the ManifestList
-    pub fn get_digests(&self) -> Vec<String> {
+    pub fn get_digests(&self) -> Vec<&str> {
         self.manifests.iter().map(|mo| mo.digest()).collect()
     }
 }

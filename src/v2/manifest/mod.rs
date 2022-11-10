@@ -336,7 +336,7 @@ impl Manifest {
     /// the individual image to get the layers.
     ///
     /// The returned layers list for non ManifestList images is ordered starting with the base image first.
-    pub fn layers_digests(&self, architecture: Option<&str>) -> Result<Vec<String>> {
+    pub fn layers_digests(&self, architecture: Option<&str>) -> Result<Vec<&str>> {
         match (self, self.architectures(), architecture) {
             (Manifest::S1Signed(m), _, None) => Ok(m.get_layers()),
             (Manifest::S2(m), _, None) => Ok(m.get_layers()),
