@@ -2,7 +2,9 @@ use crate::errors::{Error, Result};
 use crate::v2::*;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
+use cow_utils::CowUtils;
 use reqwest::{header::HeaderValue, RequestBuilder, StatusCode, Url};
+use serde::Serializer;
 
 /// Represents all supported authentication schemes and is stored by `Client`.
 #[derive(Debug, Clone)]
@@ -139,28 +141,27 @@ impl WwwAuthenticateHeaderContent {
             .to_lowercase();
 
         let serialized_content = {
-            let serialized_captures = captures
+            let captures = captures
                 .iter()
                 .filter_map(|capture| {
                     match (
-                        capture.name("key").map(|n| n.as_str().to_lowercase()),
-                        capture.name("value").map(|n| n.as_str().to_string()),
+                        capture.name("key").map(|n| n.as_str().cow_to_lowercase()),
+                        capture.name("value").map(|n| n.as_str()),
                     ) {
-                        (Some(key), Some(value)) => Some(format!(
-                            r#"{}: {}"#,
-                            serde_json::Value::String(key),
-                            serde_json::Value::String(value),
-                        )),
+                        (Some(key), Some(value)) => Some((key, value)),
                         _ => None,
                     }
-                })
-                .collect::<Vec<_>>()
-                .join(", ");
+                });
+			let mut output = Vec::with_capacity(128);
+			let mut json = serde_json::ser::Serializer::new(&mut output);
+			json.collect_map(captures)?;
+			// SAFETY:  serde_json only emits value UTF-8
+			let output = unsafe { String::from_utf8_unchecked(output) };
 
             format!(
-                r#"{{ {}: {{ {} }} }}"#,
-                serde_json::Value::String(method),
-                serialized_captures
+                r#"{{ "{}": {} }}"#,
+                method,
+                output
             )
         };
 
