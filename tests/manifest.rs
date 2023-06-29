@@ -54,7 +54,7 @@ fn test_deserialize_manifest_v2s2_config() -> Result<(), Box<dyn std::error::Err
 fn test_manifest_v2s2() -> Result<(), Box<dyn std::error::Error>> {
     let manifest = deserialize_manifest_v2s2_config()?;
 
-    assert_eq!("amd64", manifest.architectures()?[0]);
+    assert_eq!("amd64", manifest.architectures()?.next().unwrap());
     assert_eq!(
         vec![
             "sha256:9391a94f7498d07a595f560d60350d428b1259d622e19beee61a2363edc4eb94",
@@ -63,7 +63,7 @@ fn test_manifest_v2s2() -> Result<(), Box<dyn std::error::Error>> {
             "sha256:38170656dfefb3fbc6c7d7b07a1ab128227144f2eaa16eb8c877fe6a0b755670",
             "sha256:05db9bb68935b217cc844ab63e11ca816adbdd8a4aeeb4066c4c8d1125817f81",
         ],
-        manifest.layers_digests(Some("amd64"))?
+        manifest.layers_digests(Some("amd64"))?.collect::<Vec<_>>()
     );
 
     Ok(())

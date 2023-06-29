@@ -80,11 +80,11 @@ fn valid_references() {
         let r = r.unwrap();
 
         asserting(t.input)
-            .that(&r.repository().as_str())
+            .that(&r.repository())
             .is_equal_to(t.expected_repo);
 
         asserting(t.input)
-            .that(&r.registry().as_str())
+            .that(&r.registry())
             .is_equal_to(t.expected_registry);
     }
 }
