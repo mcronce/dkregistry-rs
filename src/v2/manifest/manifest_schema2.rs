@@ -94,7 +94,7 @@ impl ManifestSchema2Spec {
     pub(crate) async fn fetch_config_blob(
         self,
         client: &crate::v2::Client,
-        repo: String,
+        repo: &str,
     ) -> Result<ManifestSchema2> {
         let ep = format!(
             "{}/v2/{}/blobs/{}",
