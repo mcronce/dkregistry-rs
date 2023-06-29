@@ -19,7 +19,7 @@
 //! let dclient = Client::configure()
 //!                      .registry("quay.io")
 //!                      .build()?;
-//! let manifest = dclient.get_manifest("coreos/etcd", "v3.1.0").await?;
+//! let manifest = dclient.get_manifest("coreos/etcd", "v3.1.0", None).await?;
 //! #
 //! # Ok(())
 //! # };
