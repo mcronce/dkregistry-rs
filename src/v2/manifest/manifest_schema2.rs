@@ -1,5 +1,6 @@
 use crate::errors::{Error, Result};
 use crate::mediatypes::MediaTypes;
+use compact_str::CompactString;
 use reqwest::Method;
 
 /// Manifest version 2 schema 2.
@@ -27,7 +28,7 @@ pub struct ManifestSchema2 {
 #[derive(Debug, Default, Deserialize, Serialize, Clone)]
 pub struct Config {
     #[serde(rename = "mediaType")]
-    pub media_type: String,
+    pub media_type: CompactString,
     pub size: u64,
     pub digest: String,
 }
@@ -39,13 +40,13 @@ pub struct Config {
 /// [image-spec-v1]: https://github.com/moby/moby/blob/a30990b3c8d0d42280fa501287859e1d2393a951/image/spec/v1.md#image-json-description
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct ConfigBlob {
-    architecture: String,
+    architecture: CompactString,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 struct S2Layer {
     #[serde(rename = "mediaType")]
-    media_type: String,
+    media_type: CompactString,
     size: u64,
     digest: String,
     urls: Option<Vec<String>>,
@@ -57,7 +58,7 @@ pub struct ManifestList {
     #[serde(rename = "schemaVersion")]
     schema_version: u16,
     #[serde(rename = "mediaType")]
-    media_type: String,
+    media_type: CompactString,
     pub manifests: Vec<ManifestObj>,
 }
 
@@ -65,7 +66,7 @@ pub struct ManifestList {
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct ManifestObj {
     #[serde(rename = "mediaType")]
-    media_type: String,
+    media_type: CompactString,
     size: u64,
     pub digest: String,
     pub platform: Platform,
@@ -74,14 +75,14 @@ pub struct ManifestObj {
 /// Platform-related manifest entries.
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Platform {
-    pub architecture: String,
-    pub os: String,
+    pub architecture: CompactString,
+    pub os: CompactString,
     #[serde(rename = "os.version")]
-    pub os_version: Option<String>,
+    pub os_version: Option<CompactString>,
     #[serde(rename = "os.features")]
-    pub os_features: Option<Vec<String>>,
-    pub variant: Option<String>,
-    pub features: Option<Vec<String>>,
+    pub os_features: Option<Vec<CompactString>>,
+    pub variant: Option<CompactString>,
+    pub features: Option<Vec<CompactString>>,
 }
 
 impl ManifestSchema2Spec {

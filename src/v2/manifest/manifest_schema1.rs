@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use compact_str::CompactString;
+
 /// Manifest version 2 schema 1, signed.
 ///
 /// Specification is at <https://docs.docker.com/registry/spec/manifest-v2-1/>.
@@ -7,9 +9,9 @@ use std::collections::HashMap;
 pub struct ManifestSchema1Signed {
     #[serde(rename = "schemaVersion")]
     schema_version: u16,
-    pub name: String,
-    pub tag: String,
-    pub architecture: String,
+    pub name: CompactString,
+    pub tag: CompactString,
+    pub architecture: CompactString,
     #[serde(rename = "fsLayers")]
     fs_layers: Vec<S1Layer>,
     history: Vec<V1Compat>,
