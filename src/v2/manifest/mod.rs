@@ -181,7 +181,7 @@ impl Client {
         let accept_types = match mediatypes {
             None => {
                 let m = MediaTypes::ManifestV2S2.to_mime();
-				Either::Left(std::iter::once(m))
+                Either::Left(std::iter::once(m))
             }
             Some(v) => Either::Right(to_mimes(v)),
         };
@@ -227,15 +227,13 @@ impl Client {
 }
 
 fn to_mimes<'a>(v: &'a [&'a str]) -> impl Iterator<Item = mime::Mime> + 'a {
-    let res = v
-        .iter()
-        .filter_map(|x| {
-            let mtype = MediaTypes::from_str(x);
-            match mtype {
-                Ok(m) => Some(m.to_mime()),
-                _ => None,
-            }
-        });
+    let res = v.iter().filter_map(|x| {
+        let mtype = MediaTypes::from_str(x);
+        match mtype {
+            Ok(m) => Some(m.to_mime()),
+            _ => None,
+        }
+    });
     res
 }
 
@@ -360,7 +358,9 @@ impl Manifest {
                 }
                 Ok(Either::Right(Either::Right(Either::Left(m.get_layers()))))
             }
-            (Manifest::ML(m), _, _) => Ok(Either::Right(Either::Right(Either::Right(m.get_digests())))),
+            (Manifest::ML(m), _, _) => {
+                Ok(Either::Right(Either::Right(Either::Right(m.get_digests()))))
+            }
             _ => Err(ManifestError::LayerDigestsUnsupported(format!("{:?}", self)).into()),
         }
     }

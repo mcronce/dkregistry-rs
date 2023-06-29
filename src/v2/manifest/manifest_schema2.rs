@@ -125,10 +125,7 @@ impl ManifestSchema2 {
     ///
     /// The returned layers list is ordered starting with the base image first.
     pub fn get_layers(&self) -> impl Iterator<Item = &str> {
-        self.manifest_spec
-            .layers
-            .iter()
-            .map(|l| l.digest.as_ref())
+        self.manifest_spec.layers.iter().map(|l| l.digest.as_ref())
     }
 
     /// Get the architecture from the config

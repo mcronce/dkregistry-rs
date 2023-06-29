@@ -43,10 +43,7 @@ impl ManifestSchema1Signed {
     ///
     /// The returned layers list is ordered starting with the base image first.
     pub fn get_layers(&self) -> impl Iterator<Item = &str> {
-        self.fs_layers
-            .iter()
-            .rev()
-            .map(|l| l.blob_sum.as_ref())
+        self.fs_layers.iter().rev().map(|l| l.blob_sum.as_ref())
     }
 
     /// Get a collection of all image labels stored in the history array of this manifest.
