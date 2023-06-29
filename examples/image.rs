@@ -89,7 +89,7 @@ async fn run(
         .filter(Some("trace"), log::LevelFilter::Trace)
         .try_init()?;
 
-    let client = dkregistry::v2::Client::configure()
+    let mut client = dkregistry::v2::Client::configure()
         .registry(registry)
         .insecure_registry(false)
         .username(user)
@@ -98,15 +98,15 @@ async fn run(
 
     let login_scope = format!("repository:{}:pull", image);
 
-    let dclient = client.authenticate(&[&login_scope]).await?;
-    let manifest = dclient.get_manifest(&image, &version).await?;
-    let layers_digests = manifest.layers_digests(None)?;
+    client.authenticate(&[&login_scope]).await?;
+    let manifest = client.get_manifest(&image, &version, None).await?;
+    let layers_digests = manifest.layers_digests(None)?.collect::<Vec<_>>();
 
     println!("{} -> got {} layer(s)", &image, layers_digests.len(),);
 
     let blob_futures = layers_digests
         .iter()
-        .map(|layer_digest| dclient.get_blob(&image, &layer_digest))
+        .map(|layer_digest| client.get_blob(&image, &layer_digest, None))
         .collect::<Vec<_>>();
 
     let blobs = try_join_all(blob_futures).await?;

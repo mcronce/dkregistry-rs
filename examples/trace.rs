@@ -64,7 +64,7 @@ async fn run(
     let image = dkr_ref.repository();
     let version = dkr_ref.version();
 
-    let client = dkregistry::v2::Client::configure()
+    let mut client = dkregistry::v2::Client::configure()
         .registry(&dkr_ref.registry())
         .insecure_registry(false)
         .username(user)
@@ -73,14 +73,14 @@ async fn run(
 
     let login_scope = "";
 
-    let dclient = client.authenticate(&[&login_scope]).await?;
-    let manifest = dclient.get_manifest(&image, &version).await?;
+    client.authenticate(&[&login_scope]).await?;
+    let manifest = client.get_manifest(&image, &version, None).await?;
 
-    let layers_digests = manifest.layers_digests(None)?;
+    let layers_digests = manifest.layers_digests(None)?.collect::<Vec<_>>();
     println!("{} -> got {} layer(s)", &image, layers_digests.len(),);
 
     for layer_digest in &layers_digests {
-        let blob = dclient.get_blob(&image, &layer_digest).await?;
+        let blob = client.get_blob(&image, &layer_digest, None).await?;
         println!("Layer {}, got {} bytes.\n", layer_digest, blob.len());
     }
 
