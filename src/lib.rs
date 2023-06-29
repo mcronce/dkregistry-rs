@@ -46,6 +46,7 @@ pub mod reference;
 pub mod render;
 pub mod v2;
 
+use base64::engine::Engine;
 use compact_str::CompactString;
 use errors::{Error, Result};
 use std::collections::HashMap;
@@ -69,7 +70,7 @@ pub fn get_credentials<T: Read>(
         other => other,
     };
     let auth = match map.auths.get(real_index) {
-        Some(x) => base64::decode(x.auth.as_str())?,
+        Some(x) => base64::engine::general_purpose::STANDARD.decode(x.auth.as_str())?,
         None => return Err(Error::AuthInfoMissing(real_index.to_string())),
     };
     let s = CompactString::from_utf8(auth)?;
