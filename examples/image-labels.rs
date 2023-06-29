@@ -58,7 +58,7 @@ async fn run(
     user: Option<String>,
     passwd: Option<String>,
 ) -> Result<(), dkregistry::errors::Error> {
-    let client = dkregistry::v2::Client::configure()
+    let mut client = dkregistry::v2::Client::configure()
         .registry(&dkr_ref.registry())
         .insecure_registry(false)
         .username(user)
@@ -69,8 +69,8 @@ async fn run(
     let login_scope = format!("repository:{}:pull", image);
     let version = dkr_ref.version();
 
-    let dclient = client.authenticate(&[&login_scope]).await?;
-    let manifest = dclient.get_manifest(&image, &version).await?;
+    client.authenticate(&[&login_scope]).await?;
+    let manifest = client.get_manifest(&image, &version, None).await?;
 
     if let Manifest::S1Signed(s1s) = manifest {
         let labels = s1s.get_labels(0);
