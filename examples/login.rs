@@ -46,14 +46,14 @@ async fn run(
         .filter(Some("trace"), log::LevelFilter::Trace)
         .try_init()?;
 
-    let client = dkregistry::v2::Client::configure()
+    let mut client = dkregistry::v2::Client::configure()
         .registry(host)
         .insecure_registry(false)
         .username(user)
         .password(passwd)
         .build()?;
 
-    let dclient = client.authenticate(&[&login_scope]).await?;
-    dclient.is_auth().await?;
+    client.authenticate(&[&login_scope]).await?;
+    client.is_auth().await?;
     Ok(())
 }
