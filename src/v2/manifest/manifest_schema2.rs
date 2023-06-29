@@ -124,12 +124,11 @@ impl ManifestSchema2 {
     /// List digests of all layers referenced by this manifest.
     ///
     /// The returned layers list is ordered starting with the base image first.
-    pub fn get_layers(&self) -> Vec<&str> {
+    pub fn get_layers(&self) -> impl Iterator<Item = &str> {
         self.manifest_spec
             .layers
             .iter()
             .map(|l| l.digest.as_ref())
-            .collect()
     }
 
     /// Get the architecture from the config
@@ -152,12 +151,12 @@ impl ManifestObj {
 
 impl ManifestList {
     /// Get architecture of all the manifests
-    pub fn architectures(&self) -> Vec<&str> {
-        self.manifests.iter().map(|mo| mo.architecture()).collect()
+    pub fn architectures(&self) -> impl Iterator<Item = &str> {
+        self.manifests.iter().map(|mo| mo.architecture())
     }
 
     /// Get the digest for all the manifest images in the ManifestList
-    pub fn get_digests(&self) -> Vec<&str> {
-        self.manifests.iter().map(|mo| mo.digest()).collect()
+    pub fn get_digests(&self) -> impl Iterator<Item = &str> {
+        self.manifests.iter().map(|mo| mo.digest())
     }
 }

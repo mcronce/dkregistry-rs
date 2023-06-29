@@ -42,12 +42,11 @@ impl ManifestSchema1Signed {
     /// List digests of all layers referenced by this manifest.
     ///
     /// The returned layers list is ordered starting with the base image first.
-    pub fn get_layers(&self) -> Vec<&str> {
+    pub fn get_layers(&self) -> impl Iterator<Item = &str> {
         self.fs_layers
             .iter()
             .rev()
             .map(|l| l.blob_sum.as_ref())
-            .collect()
     }
 
     /// Get a collection of all image labels stored in the history array of this manifest.

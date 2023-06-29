@@ -2,6 +2,7 @@ use crate::errors::{Error, Result};
 use crate::mediatypes::MediaTypes;
 use crate::v2::*;
 use bytes::Bytes;
+use itertools::Either;
 use reqwest::{self, header, StatusCode};
 use std::iter::FromIterator;
 use std::str::FromStr;
@@ -180,12 +181,12 @@ impl Client {
         let accept_types = match mediatypes {
             None => {
                 let m = MediaTypes::ManifestV2S2.to_mime();
-                vec![m]
+				Either::Left(std::iter::once(m))
             }
-            Some(v) => to_mimes(v),
+            Some(v) => Either::Right(to_mimes(v)),
         };
 
-        let mut accept_headers = header::HeaderMap::with_capacity(accept_types.len());
+        let mut accept_headers = header::HeaderMap::with_capacity(accept_types.size_hint().0);
         for accept_type in accept_types {
             let header_value = header::HeaderValue::from_str(accept_type.as_ref())
                 .expect("mime type is always valid header value");
@@ -225,7 +226,7 @@ impl Client {
     }
 }
 
-fn to_mimes(v: &[&str]) -> Vec<mime::Mime> {
+fn to_mimes<'a>(v: &'a [&'a str]) -> impl Iterator<Item = mime::Mime> + 'a {
     let res = v
         .iter()
         .filter_map(|x| {
@@ -234,8 +235,7 @@ fn to_mimes(v: &[&str]) -> Vec<mime::Mime> {
                 Ok(m) => Some(m.to_mime()),
                 _ => None,
             }
-        })
-        .collect();
+        });
     res
 }
 
@@ -338,39 +338,39 @@ impl Manifest {
     /// the individual image to get the layers.
     ///
     /// The returned layers list for non ManifestList images is ordered starting with the base image first.
-    pub fn layers_digests(&self, architecture: Option<&str>) -> Result<Vec<&str>> {
+    pub fn layers_digests(&self, architecture: Option<&str>) -> Result<impl Iterator<Item = &str>> {
         match (self, self.architectures(), architecture) {
-            (Manifest::S1Signed(m), _, None) => Ok(m.get_layers()),
-            (Manifest::S2(m), _, None) => Ok(m.get_layers()),
-            (Manifest::S1Signed(m), Ok(ref self_architectures), Some(ref a)) => {
+            (Manifest::S1Signed(m), _, None) => Ok(Either::Left(Either::Left(m.get_layers()))),
+            (Manifest::S2(m), _, None) => Ok(Either::Left(Either::Right(m.get_layers()))),
+            (Manifest::S1Signed(m), Ok(mut self_architectures), Some(a)) => {
                 let self_a = self_architectures
-                    .first()
+                    .next()
                     .ok_or(ManifestError::NoArchitecture)?;
                 if self_a != a {
                     return Err(ManifestError::ArchitectureMismatch.into());
                 }
-                Ok(m.get_layers())
+                Ok(Either::Right(Either::Left(m.get_layers())))
             }
-            (Manifest::S2(m), Ok(ref self_architectures), Some(ref a)) => {
+            (Manifest::S2(m), Ok(mut self_architectures), Some(a)) => {
                 let self_a = self_architectures
-                    .first()
+                    .next()
                     .ok_or(ManifestError::NoArchitecture)?;
                 if self_a != a {
                     return Err(ManifestError::ArchitectureMismatch.into());
                 }
-                Ok(m.get_layers())
+                Ok(Either::Right(Either::Right(Either::Left(m.get_layers()))))
             }
-            (Manifest::ML(m), _, _) => Ok(m.get_digests()),
+            (Manifest::ML(m), _, _) => Ok(Either::Right(Either::Right(Either::Right(m.get_digests())))),
             _ => Err(ManifestError::LayerDigestsUnsupported(format!("{:?}", self)).into()),
         }
     }
 
     /// The architectures of the image the manifest points to, if available.
-    pub fn architectures(&self) -> Result<Vec<&str>> {
+    pub fn architectures(&self) -> Result<impl Iterator<Item = &str>> {
         match self {
-            Manifest::S1Signed(m) => Ok(vec![&m.architecture]),
-            Manifest::S2(m) => Ok([m.architecture()].to_vec()),
-            Manifest::ML(m) => Ok(m.architectures()),
+            Manifest::S1Signed(m) => Ok(Either::Left(std::iter::once(m.architecture.as_ref()))),
+            Manifest::S2(m) => Ok(Either::Left(std::iter::once(m.architecture()))),
+            Manifest::ML(m) => Ok(Either::Right(m.architectures())),
         }
     }
 
