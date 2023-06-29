@@ -14,7 +14,7 @@ pub enum Error {
     #[error("URI parse error")]
     Uri(#[from] url::ParseError),
     #[error("input is not UTF-8")]
-    Ut8Parse(#[from] std::string::FromUtf8Error),
+    Ut8Parse(#[from] std::str::Utf8Error),
     #[error("strum error")]
     StrumParse(#[from] strum::ParseError),
     #[error("authentication information missing for index {0}")]

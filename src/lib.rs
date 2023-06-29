@@ -46,6 +46,7 @@ pub mod reference;
 pub mod render;
 pub mod v2;
 
+use compact_str::CompactString;
 use errors::{Error, Result};
 use std::collections::HashMap;
 use std::io::Read;
@@ -71,7 +72,7 @@ pub fn get_credentials<T: Read>(
         Some(x) => base64::decode(x.auth.as_str())?,
         None => return Err(Error::AuthInfoMissing(real_index.to_string())),
     };
-    let s = String::from_utf8(auth)?;
+    let s = CompactString::from_utf8(auth)?;
     let creds: Vec<&str> = s.splitn(2, ':').collect();
     let up = match (creds.first(), creds.get(1)) {
         (Some(&""), Some(p)) => (None, Some(p.to_string())),

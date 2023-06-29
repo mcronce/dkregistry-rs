@@ -1,5 +1,7 @@
 use crate::errors::{Error, Result};
 use crate::v2::*;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
 use reqwest::{header::HeaderValue, RequestBuilder, StatusCode, Url};
 
 /// Represents all supported authentication schemes and is stored by `Client`.
@@ -121,7 +123,7 @@ pub enum WwwHeaderParseError {
 impl WwwAuthenticateHeaderContent {
     /// Create a `WwwAuthenticateHeaderContent` by parsing a `HeaderValue` instance.
     pub(crate) fn from_www_authentication_header(header_value: HeaderValue) -> Result<Self> {
-        let header = String::from_utf8(header_value.as_bytes().to_vec())?;
+        let header = CompactString::from_utf8(header_value.as_bytes())?;
 
         // This regex will result in multiple captures which will contain one key-value pair each.
         // The first capture will be the only one with the "method" group set.
@@ -167,7 +169,7 @@ impl WwwAuthenticateHeaderContent {
         let content: WwwAuthenticateHeaderContent = serde_ignored::deserialize(
             &mut serde_json::Deserializer::from_str(&serialized_content),
             |path| {
-                unsupported_keys.insert(path.to_string());
+                unsupported_keys.insert(path.to_compact_string());
             },
         )?;
 
