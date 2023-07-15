@@ -141,28 +141,22 @@ impl WwwAuthenticateHeaderContent {
             .to_lowercase();
 
         let serialized_content = {
-            let captures = captures
-                .iter()
-                .filter_map(|capture| {
-                    match (
-                        capture.name("key").map(|n| n.as_str().cow_to_lowercase()),
-                        capture.name("value").map(|n| n.as_str()),
-                    ) {
-                        (Some(key), Some(value)) => Some((key, value)),
-                        _ => None,
-                    }
-                });
-			let mut output = Vec::with_capacity(128);
-			let mut json = serde_json::ser::Serializer::new(&mut output);
-			json.collect_map(captures)?;
-			// SAFETY:  serde_json only emits value UTF-8
-			let output = unsafe { String::from_utf8_unchecked(output) };
+            let captures = captures.iter().filter_map(|capture| {
+                match (
+                    capture.name("key").map(|n| n.as_str().cow_to_lowercase()),
+                    capture.name("value").map(|n| n.as_str()),
+                ) {
+                    (Some(key), Some(value)) => Some((key, value)),
+                    _ => None,
+                }
+            });
+            let mut output = Vec::with_capacity(128);
+            let mut json = serde_json::ser::Serializer::new(&mut output);
+            json.collect_map(captures)?;
+            // SAFETY:  serde_json only emits value UTF-8
+            let output = unsafe { String::from_utf8_unchecked(output) };
 
-            format!(
-                r#"{{ "{}": {} }}"#,
-                method,
-                output
-            )
+            format!(r#"{{ "{}": {} }}"#, method, output)
         };
 
         // Deserialize the content
