@@ -21,6 +21,10 @@ use strum::EnumProperty;
     SerializeDisplay,
 )]
 pub enum MediaTypes {
+    /// OCI image, version 1
+    #[strum(serialize = "application/vnd.oci.image.index.v1+json")]
+    #[strum(props(Sub = "vnd.oci.image.index.v1+json"))]
+    OciV1,
     /// Manifest, version 2 schema 1.
     #[strum(serialize = "application/vnd.docker.distribution.manifest.v1+json")]
     #[strum(props(Sub = "vnd.docker.distribution.manifest.v1+json"))]
