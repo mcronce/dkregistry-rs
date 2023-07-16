@@ -24,7 +24,7 @@ pub enum MediaTypes {
     /// OCI image, version 1
     #[strum(serialize = "application/vnd.oci.image.index.v1+json")]
     #[strum(props(Sub = "vnd.oci.image.index.v1+json"))]
-    OciV1,
+    OciV1ManifestList,
     /// OCI manifest, version 1
     #[strum(serialize = "application/vnd.oci.image.manifest.v1+json")]
     #[strum(props(Sub = "vnd.oci.image.manifest.v1+json"))]

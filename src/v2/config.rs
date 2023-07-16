@@ -100,7 +100,7 @@ impl Config {
                     (MediaTypes::ManifestV2S2, Some(0.5)),
                     (MediaTypes::ManifestV2S1Signed, Some(0.4)),
                     (MediaTypes::ManifestList, Some(0.5)),
-                    (MediaTypes::OciV1, Some(0.3)),
+                    (MediaTypes::OciV1ManifestList, Some(0.3)),
                 ],
                 // GCR incorrectly parses `q` parameters, so we use special Accept for it.
                 // Bug: https://issuetracker.google.com/issues/159827510.
@@ -109,7 +109,7 @@ impl Config {
                     (MediaTypes::ManifestV2S2, None),
                     (MediaTypes::ManifestV2S1Signed, None),
                     (MediaTypes::ManifestList, None),
-                    (MediaTypes::OciV1, None),
+                    (MediaTypes::OciV1ManifestList, None),
                 ],
             },
         };
