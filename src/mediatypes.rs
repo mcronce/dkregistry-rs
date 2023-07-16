@@ -64,21 +64,19 @@ impl MediaTypes {
     pub fn from_mime(mtype: &mime::Mime) -> Result<Self> {
         match (mtype.type_(), mtype.subtype(), mtype.suffix()) {
             (mime::APPLICATION, mime::JSON, _) => Ok(MediaTypes::ApplicationJson),
-            (mime::APPLICATION, subt, Some(suff)) => {
-                match (subt.as_str(), suff.as_str()) {
-                    ("vnd.docker.distribution.manifest.v1", "json") => Ok(MediaTypes::ManifestV2S1),
-                    ("vnd.docker.distribution.manifest.v1", "prettyjws") => {
-                        Ok(MediaTypes::ManifestV2S1Signed)
-                    }
-                    ("vnd.docker.distribution.manifest.v2", "json") => Ok(MediaTypes::ManifestV2S2),
-                    ("vnd.docker.distribution.manifest.list.v2", "json") => {
-                        Ok(MediaTypes::ManifestList)
-                    }
-                    ("vnd.docker.image.rootfs.diff.tar.gzip", _) => Ok(MediaTypes::ImageLayerTgz),
-                    ("vnd.docker.container.image.v1", "json") => Ok(MediaTypes::ContainerConfigV1),
-                    _ => Err(crate::Error::UnknownMimeType(mtype.clone())),
+            (mime::APPLICATION, subt, Some(suff)) => match (subt.as_str(), suff.as_str()) {
+                ("vnd.docker.distribution.manifest.v1", "json") => Ok(MediaTypes::ManifestV2S1),
+                ("vnd.docker.distribution.manifest.v1", "prettyjws") => {
+                    Ok(MediaTypes::ManifestV2S1Signed)
                 }
-            }
+                ("vnd.docker.distribution.manifest.v2", "json") => Ok(MediaTypes::ManifestV2S2),
+                ("vnd.docker.distribution.manifest.list.v2", "json") => {
+                    Ok(MediaTypes::ManifestList)
+                }
+                ("vnd.docker.image.rootfs.diff.tar.gzip", _) => Ok(MediaTypes::ImageLayerTgz),
+                ("vnd.docker.container.image.v1", "json") => Ok(MediaTypes::ContainerConfigV1),
+                _ => Err(crate::Error::UnknownMimeType(mtype.clone())),
+            },
             _ => Err(crate::Error::UnknownMimeType(mtype.clone())),
         }
     }
