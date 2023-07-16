@@ -29,6 +29,10 @@ pub enum MediaTypes {
     #[strum(serialize = "application/vnd.oci.image.manifest.v1+json")]
     #[strum(props(Sub = "vnd.oci.image.manifest.v1+json"))]
     OciV1Manifest,
+    /// OCI manifest config, version 1
+    #[strum(serialize = "application/vnd.oci.image.config.v1+json")]
+    #[strum(props(Sub = "vnd.oci.image.config.v1+json"))]
+    OciV1ManifestConfig,
     /// Manifest, version 2 schema 1.
     #[strum(serialize = "application/vnd.docker.distribution.manifest.v1+json")]
     #[strum(props(Sub = "vnd.docker.distribution.manifest.v1+json"))]
