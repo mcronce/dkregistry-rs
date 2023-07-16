@@ -83,7 +83,7 @@ impl MediaTypes {
             &MediaTypes::ApplicationJson => Ok(mime::APPLICATION_JSON),
             m => {
                 if let Some(s) = m.get_str("Sub") {
-                    ("application/".to_string() + s).parse()
+                    format!("application/{s}").parse()
                 } else {
                     "application/star".parse()
                 }
