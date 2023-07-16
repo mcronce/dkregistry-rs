@@ -61,7 +61,7 @@ impl MediaTypes {
         match (mtype.type_(), mtype.subtype(), mtype.suffix()) {
             (mime::APPLICATION, mime::JSON, _) => Ok(MediaTypes::ApplicationJson),
             (mime::APPLICATION, subt, Some(suff)) => {
-                match (subt.to_string().as_str(), suff.to_string().as_str()) {
+                match (subt.as_str(), suff.as_str()) {
                     ("vnd.docker.distribution.manifest.v1", "json") => Ok(MediaTypes::ManifestV2S1),
                     ("vnd.docker.distribution.manifest.v1", "prettyjws") => {
                         Ok(MediaTypes::ManifestV2S1Signed)
