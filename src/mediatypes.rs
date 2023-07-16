@@ -81,13 +81,10 @@ impl MediaTypes {
     pub fn to_mime(&self) -> mime::Mime {
         match self {
             &MediaTypes::ApplicationJson => Ok(mime::APPLICATION_JSON),
-            m => {
-                if let Some(s) = m.get_str("Sub") {
-                    format!("application/{s}").parse()
-                } else {
-                    "application/star".parse()
-                }
-            }
+            m => match m.get_str("Sub") {
+                Some(s) => format!("application/{s}").parse(),
+                None => "application/star".parse(),
+            },
         }
         .expect("to_mime should be always successful")
     }
