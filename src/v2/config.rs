@@ -1,3 +1,5 @@
+use compact_str::CompactString;
+
 use crate::{mediatypes::MediaTypes, v2::*};
 
 /// Configuration for a `Client`.
@@ -6,8 +8,8 @@ pub struct Config {
     index: String,
     insecure_registry: bool,
     user_agent: Option<String>,
-    username: Option<String>,
-    password: Option<String>,
+    username: Option<CompactString>,
+    password: Option<CompactString>,
     accept_invalid_certs: bool,
     accepted_types: Option<Vec<(MediaTypes, Option<f64>)>>,
 }
@@ -47,13 +49,13 @@ impl Config {
     }
 
     /// Set the username to be used for registry authentication.
-    pub fn username(mut self, user: Option<String>) -> Self {
+    pub fn username(mut self, user: Option<CompactString>) -> Self {
         self.username = user;
         self
     }
 
     /// Set the password to be used for registry authentication.
-    pub fn password(mut self, password: Option<String>) -> Self {
+    pub fn password(mut self, password: Option<CompactString>) -> Self {
         self.password = password;
         self
     }

@@ -38,7 +38,7 @@ impl BearerAuth {
     async fn try_from_header_content(
         client: &Client,
         scopes: &[&str],
-        credentials: Option<(String, String)>,
+        credentials: Option<(CompactString, CompactString)>,
         bearer_header_content: WwwAuthenticateHeaderContentBearer,
     ) -> Result<Self> {
         let auth_ep = bearer_header_content.auth_ep(scopes);
@@ -89,8 +89,8 @@ impl BearerAuth {
 /// Used for Basic HTTP Authentication.
 #[derive(Debug, Clone)]
 pub struct BasicAuth {
-    user: String,
-    password: Option<String>,
+    user: CompactString,
+    password: Option<CompactString>,
 }
 
 /// Structured representation for the content of the authentication response header.

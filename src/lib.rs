@@ -48,6 +48,7 @@ pub mod v2;
 
 use base64::engine::Engine;
 use compact_str::CompactString;
+use compact_str::ToCompactString;
 use errors::{Error, Result};
 use std::collections::HashMap;
 use std::io::Read;
@@ -62,7 +63,7 @@ pub static USER_AGENT: &str = "camallo-dkregistry/0.0";
 pub fn get_credentials<T: Read>(
     reader: T,
     index: &str,
-) -> Result<(Option<String>, Option<String>)> {
+) -> Result<(Option<CompactString>, Option<CompactString>)> {
     let map: Auths = serde_json::from_reader(reader)?;
     let real_index = match index {
         // docker.io has some special casing in config.json
@@ -76,9 +77,9 @@ pub fn get_credentials<T: Read>(
     let s = CompactString::from_utf8(auth)?;
     let mut creds = s.splitn(2, ':');
     let up = match (creds.next(), creds.next()) {
-        (Some(""), Some(p)) => (None, Some(p.to_string())),
-        (Some(u), Some("")) => (Some(u.to_string()), None),
-        (Some(u), Some(p)) => (Some(u.to_string()), Some(p.to_string())),
+        (Some(""), Some(p)) => (None, Some(p.to_compact_string())),
+        (Some(u), Some("")) => (Some(u.to_compact_string()), None),
+        (Some(u), Some(p)) => (Some(u.to_compact_string()), Some(p.to_compact_string())),
         (_, _) => (None, None),
     };
     trace!("Found credentials for user={:?} on {}", up.0, index);
