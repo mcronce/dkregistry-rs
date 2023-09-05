@@ -17,9 +17,9 @@ impl Auth {
     /// Add authentication headers to a request builder.
     pub(crate) fn add_auth_headers(&self, request_builder: RequestBuilder) -> RequestBuilder {
         match self {
-            Auth::Bearer(bearer_auth) => request_builder.bearer_auth(bearer_auth.token.clone()),
+            Auth::Bearer(bearer_auth) => request_builder.bearer_auth(&bearer_auth.token),
             Auth::Basic(basic_auth) => {
-                request_builder.basic_auth(basic_auth.user.clone(), basic_auth.password.clone())
+                request_builder.basic_auth(&basic_auth.user, basic_auth.password.as_ref())
             }
         }
     }
