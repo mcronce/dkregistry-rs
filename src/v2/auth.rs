@@ -225,11 +225,11 @@ impl Client {
     /// Make a request and return the response's www authentication header.
     async fn get_www_authentication_header(&self) -> Result<HeaderValue> {
         let url = {
-            let ep = format!("{}/v2/", self.base_url.clone(),);
+            let ep = format!("{}/v2/", self.base_url);
             reqwest::Url::parse(&ep)?
         };
 
-        let r = self.build_reqwest(Method::GET, url.clone()).send().await?;
+        let r = self.build_reqwest(Method::GET, url).send().await?;
 
         trace!("GET '{}' status: {:?}", r.url(), r.status());
         r.headers()
