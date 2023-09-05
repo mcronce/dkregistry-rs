@@ -242,18 +242,18 @@ impl Client {
     ///
     /// If Bearer authentication is used the returned client will be authorized for the requested scopes.
     pub async fn authenticate(&mut self, scopes: &[&str]) -> Result<()> {
-        let credentials = self.credentials.clone();
-
         self.auth = match self.get_www_authentication_header().await {
             Ok(authentication_header) => {
                 match WwwAuthenticateHeaderContent::from_www_authentication_header(
                     authentication_header,
                 )? {
                     WwwAuthenticateHeaderContent::Basic(_) => {
-                        let basic_auth = credentials
+                        let basic_auth = self
+                            .credentials
+                            .as_ref()
                             .map(|(user, password)| BasicAuth {
-                                user,
-                                password: Some(password),
+                                user: user.clone(),
+                                password: Some(password.clone()),
                             })
                             .ok_or(Error::NoCredentials)?;
 
@@ -263,7 +263,7 @@ impl Client {
                         let bearer_auth = BearerAuth::try_from_header_content(
                             self,
                             scopes,
-                            credentials,
+                            self.credentials.clone(),
                             bearer_header_content,
                         )
                         .await?;
