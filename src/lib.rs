@@ -74,10 +74,10 @@ pub fn get_credentials<T: Read>(
         None => return Err(Error::AuthInfoMissing(real_index.to_string())),
     };
     let s = CompactString::from_utf8(auth)?;
-    let creds: Vec<&str> = s.splitn(2, ':').collect();
-    let up = match (creds.first(), creds.get(1)) {
-        (Some(&""), Some(p)) => (None, Some(p.to_string())),
-        (Some(u), Some(&"")) => (Some(u.to_string()), None),
+    let mut creds = s.splitn(2, ':');
+    let up = match (creds.next(), creds.next()) {
+        (Some(""), Some(p)) => (None, Some(p.to_string())),
+        (Some(u), Some("")) => (Some(u.to_string()), None),
         (Some(u), Some(p)) => (Some(u.to_string()), Some(p.to_string())),
         (_, _) => (None, None),
     };
