@@ -242,6 +242,7 @@ impl Client {
     ///
     /// If Bearer authentication is used the returned client will be authorized for the requested scopes.
     pub async fn authenticate(&mut self, scopes: &[&str]) -> Result<()> {
+        self.auth = None;
         self.auth = match self.get_www_authentication_header().await {
             Ok(authentication_header) => {
                 match WwwAuthenticateHeaderContent::from_www_authentication_header(
