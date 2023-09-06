@@ -71,7 +71,7 @@ impl Client {
 
         let ok = match ct_hdr {
             None => false,
-            Some(ref ct) => ct.to_str()?.starts_with("application/json"),
+            Some(ct) => ct.as_bytes().starts_with(b"application/json"),
         };
         if !ok {
             // TODO:(steveeJ): Make this an error once Satellite
