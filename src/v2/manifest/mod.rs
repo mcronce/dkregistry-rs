@@ -108,13 +108,14 @@ impl Client {
         }
 
         let headers = res.headers();
-        let content_digest = match headers.get("docker-content-digest") {
-            Some(content_digest_value) => Some(content_digest_value.to_str()?.to_string()),
-            None => {
-                debug!("cannot find manifestref in headers");
-                None
-            }
-        };
+        let content_digest =
+            match headers.get(header::HeaderName::from_static("docker-content-digest")) {
+                Some(content_digest_value) => Some(content_digest_value.to_str()?.to_string()),
+                None => {
+                    debug!("cannot find manifestref in headers");
+                    None
+                }
+            };
 
         let header_content_type = headers.get(header::CONTENT_TYPE);
         let media_type = evaluate_media_type(header_content_type, &url)?;
