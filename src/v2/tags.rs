@@ -2,6 +2,7 @@ use crate::errors::Result;
 use crate::v2::*;
 use async_stream::try_stream;
 use reqwest::{self, header, Url};
+use std::borrow::Cow;
 use std::fmt::Debug;
 
 /// A chunk of tags for an image.
@@ -49,10 +50,10 @@ impl Client {
         link: &Option<String>,
     ) -> Result<(TagsChunk, Option<String>)> {
         let url_paginated = match (paginate, link) {
-            (Some(p), None) => format!("{}?n={}", base_url, p),
-            (None, Some(l)) => format!("{}?{}", base_url, l),
-            (Some(_p), Some(l)) => format!("{}?{}", base_url, l),
-            _ => base_url.to_string(),
+            (Some(p), None) => Cow::Owned(format!("{}?n={}", base_url, p)),
+            (None, Some(l)) => Cow::Owned(format!("{}?{}", base_url, l)),
+            (Some(_p), Some(l)) => Cow::Owned(format!("{}?{}", base_url, l)),
+            _ => Cow::Borrowed(base_url),
         };
         let url = Url::parse(&url_paginated)?;
 
