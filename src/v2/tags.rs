@@ -58,14 +58,14 @@ impl Client {
         let url = Url::parse(&url_paginated)?;
 
         let resp = self
-            .build_reqwest(Method::GET, url.clone())
+            .build_reqwest(Method::GET, url)
             .header(header::ACCEPT, "application/json")
             .send()
             .await?
             .error_for_status()?;
 
         // ensure the CONTENT_TYPE header is application/json
-        let ct_hdr = resp.headers().get(header::CONTENT_TYPE).cloned();
+        let ct_hdr = resp.headers().get(header::CONTENT_TYPE);
 
         trace!("page url {:?}", ct_hdr);
 
