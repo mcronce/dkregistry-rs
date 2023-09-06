@@ -195,7 +195,7 @@ impl Client {
         trace!("HEAD {:?}", url);
 
         let r = self
-            .build_reqwest(Method::HEAD, url.clone())
+            .build_reqwest(Method::HEAD, url)
             .headers(accept_headers)
             .send()
             .await
