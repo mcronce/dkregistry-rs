@@ -291,13 +291,12 @@ impl Client {
     /// This could be due to granted anonymous access or valid credentials.
     pub async fn is_auth(&self) -> Result<bool> {
         let url = {
-            let ep = format!("{}/v2/", self.base_url.clone(),);
+            let ep = format!("{}/v2/", self.base_url);
             Url::parse(&ep)?
         };
 
-        let req = self.build_reqwest(Method::GET, url.clone());
-
         trace!("Sending request to '{}'", url);
+        let req = self.build_reqwest(Method::GET, url);
         let resp = req.send().await?;
         trace!("GET '{:?}'", resp);
 
