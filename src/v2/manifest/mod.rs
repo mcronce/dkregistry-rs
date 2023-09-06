@@ -94,7 +94,7 @@ impl Client {
         let accept_headers = build_accept_headers(&self.accepted_types);
 
         let res = self
-            .build_reqwest(Method::GET, url.clone())
+            .build_reqwest(Method::GET, url)
             .headers(accept_headers)
             .send()
             .await?;
@@ -118,7 +118,7 @@ impl Client {
             };
 
         let header_content_type = headers.get(header::CONTENT_TYPE);
-        let media_type = evaluate_media_type(header_content_type, &url)?;
+        let media_type = evaluate_media_type(header_content_type, res.url())?;
 
         trace!(
             "content-type: {:?}, media-type: {:?}",
