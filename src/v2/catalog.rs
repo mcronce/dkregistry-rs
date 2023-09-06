@@ -21,7 +21,7 @@ impl v2::Client {
             } else {
                 "".to_string()
             };
-            let ep = format!("{}/v2/_catalog{}", self.base_url.clone(), suffix);
+            let ep = format!("{}/v2/_catalog{}", self.base_url, suffix);
 
             reqwest::Url::parse(&ep).map_err(crate::Error::from)
         };
