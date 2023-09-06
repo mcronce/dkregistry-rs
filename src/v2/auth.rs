@@ -74,13 +74,17 @@ impl BearerAuth {
         };
 
         // mask the token before logging it
-        let chars_count = bearer_auth.token.chars().count();
-        let mask_start = std::cmp::min(1, chars_count - 1);
-        let mask_end = std::cmp::max(chars_count - 1, 1);
-        let mut masked_token = bearer_auth.token.clone();
-        masked_token.replace_range(mask_start..mask_end, &"*".repeat(mask_end - mask_start));
+        let mut chars = bearer_auth.token.chars().enumerate();
+        let (_, first_char) = chars.next().unwrap();
+        let (mut chars_count, last_char) = chars.last().unwrap();
+        chars_count += 1;
 
-        trace!("authenticate: got token: {:?}", masked_token);
+        trace!(
+            "authenticate: got token: {}****{{{}}}****{}",
+            first_char,
+            chars_count,
+            last_char
+        );
 
         Ok(bearer_auth)
     }
