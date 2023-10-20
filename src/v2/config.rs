@@ -72,12 +72,12 @@ impl Config {
     /// Return a `Client` to interact with a v2 registry.
     pub fn build(self) -> Result<Client> {
         let base = if self.insecure_registry {
-            "http://".to_string() + &self.index
+            format!("http://{}", self.index).into()
         } else {
-            "https://".to_string() + &self.index
+            format!("https://{}", self.index).into()
         };
         trace!(
-            "Built client for {:?}: endpoint {:?} - user {:?}",
+            "Built client for {}: endpoint {} - user {:?}",
             self.index,
             base,
             self.username
