@@ -1,5 +1,6 @@
 use crate::errors::{Error, Result};
 use crate::v2::*;
+use arcstr::ArcStr;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use cow_utils::CowUtils;
@@ -28,10 +29,10 @@ impl Auth {
 /// Used for Bearer HTTP Authentication.
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct BearerAuth {
-    token: String,
+    token: ArcStr,
     expires_in: Option<u32>,
-    issued_at: Option<String>,
-    refresh_token: Option<String>,
+    issued_at: Option<ArcStr>,
+    refresh_token: Option<ArcStr>,
 }
 
 impl BearerAuth {

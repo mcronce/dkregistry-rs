@@ -1,3 +1,4 @@
+use arcstr::ArcStr;
 use compact_str::CompactString;
 
 use crate::{mediatypes::MediaTypes, v2::*};
@@ -7,7 +8,7 @@ use crate::{mediatypes::MediaTypes, v2::*};
 pub struct Config {
     index: String,
     insecure_registry: bool,
-    user_agent: Option<String>,
+    user_agent: Option<ArcStr>,
     username: Option<CompactString>,
     password: Option<CompactString>,
     accept_invalid_certs: bool,
@@ -43,7 +44,7 @@ impl Config {
     }
 
     /// Set the user-agent to be used for registry authentication.
-    pub fn user_agent(mut self, user_agent: Option<String>) -> Self {
+    pub fn user_agent(mut self, user_agent: Option<ArcStr>) -> Self {
         self.user_agent = user_agent;
         self
     }
@@ -137,7 +138,7 @@ impl Default for Config {
             insecure_registry: false,
             accept_invalid_certs: false,
             accepted_types: None,
-            user_agent: Some(crate::USER_AGENT.to_owned()),
+            user_agent: Some(crate::USER_AGENT.clone()),
             username: None,
             password: None,
         }

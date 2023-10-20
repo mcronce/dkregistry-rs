@@ -29,6 +29,7 @@
 
 use crate::errors::*;
 use crate::mediatypes::MediaTypes;
+use arcstr::ArcStr;
 use compact_str::CompactString;
 use futures::prelude::*;
 use reqwest::{Method, StatusCode, Url};
@@ -54,9 +55,9 @@ pub use self::content_digest::ContentDigestError;
 /// A Client to make outgoing API requests to a registry.
 #[derive(Clone, Debug)]
 pub struct Client {
-    base_url: String,
+    base_url: ArcStr,
     credentials: Option<(CompactString, CompactString)>,
-    user_agent: Option<String>,
+    user_agent: Option<ArcStr>,
     auth: Option<auth::Auth>,
     client: reqwest::Client,
     accepted_types: Vec<(MediaTypes, Option<f64>)>,

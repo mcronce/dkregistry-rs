@@ -46,6 +46,7 @@ pub mod reference;
 pub mod render;
 pub mod v2;
 
+use arcstr::ArcStr;
 use base64::engine::Engine;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -54,7 +55,7 @@ use std::collections::HashMap;
 use std::io::Read;
 
 /// Default User-Agent client identity.
-pub static USER_AGENT: &str = "camallo-dkregistry/0.0";
+pub static USER_AGENT: ArcStr = arcstr::literal!("camallo-dkregistry/0.0");
 
 /// Get registry credentials from a JSON config reader.
 ///
